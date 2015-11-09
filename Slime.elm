@@ -9,7 +9,7 @@ import Time (..)
 import Window
 import Keyboard
 
-
+--these semicircles will form the physical rendering of the slime
 semicircle : Float -> Shape
 semicircle r =
   let n = 50
@@ -55,7 +55,7 @@ type alias State = {slime1:Slime, slime2:Slime, ball: Ball}
 
 
 
-
+--initial state of the game
 initState : State
 initState =
   { slime1 =   { x=-300, y= 41 - (toFloat gameHeight / 2), vx=0, vy=0, color = lightGreen }
@@ -82,10 +82,12 @@ system2 t obj = { obj | x <- clamp 75 425  (obj.x + t*obj.vx), y <- max slimeZer
 jump y obj = if y > 0  && obj.y == slimeZero then {obj | vy <- 300} else obj
 fall t obj = if obj.y  > slimeZero then {obj | vy <- obj.vy - 15} else obj
 lateral x obj = {obj | vx <- toFloat x*200} 
- 
+
+--movement for slime 1 
 movement t x y =
  jump y >> fall t >> lateral x >> system t
  
+ --movement for slime 2
 movement2 t x y =
  jump y >> fall t >> lateral x >> system2 t 
  
@@ -94,11 +96,12 @@ moveSlime t x y slime =
 
 moveSlime2 t x y slime =  
  movement2 t x y slime
-  
+
+--explicitly defines what "near enough" means for detecting collisions  
 near l tol h = 
  h >= l - tol && h <= l + tol
  
-  
+--handles collisions between slimes and the ball  
 moveBall : Time -> Ball -> Slime -> Slime -> Ball
 moveBall t ({x,y,vx,vy} as ball) slime1 slime2 =
  if | near ball.x 3 0 && near ball.y 180 slimeZero ->
